@@ -3,13 +3,15 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "webfiles.h"
+
 int main( )
 {
     struct sockaddr_in serverAddr, clientAddr;
     int serverFd, clientFd, clientAddrLen, numBytesFromClient, numBytesToClient;
     char clientBuffer[1000];
-    char serverBuffer[ ] = "HTTP/1.1 200 OK\r\nContent-Length: 10\r\n \
-                            Content-Type: text/html\r\n\r\nWebserver!";
+    char serverBuffer[100];
+    struct Webfile *idx;
 
     printf("Webserver!\n\n");
 
@@ -71,7 +73,14 @@ int main( )
     printf("%s", clientBuffer);
     printf("--------------------------------------------------------------------\n");
 
-    numBytesToClient = write(clientFd, serverBuffer, strlen(serverBuffer));
+    getIndex(&idx);
+
+    snprintf(serverBuffer, 100, "%s%d%s", "HTTP/1.1 200 OK\r\nContent-Length: ",
+                        idx->len, "\r\nContent-Type: text/html\r\n\r\n");
+
+    numBytesToClient  = write(clientFd, serverBuffer, strlen(serverBuffer));
+    numBytesToClient += write(clientFd, idx->content, idx->len);
+
     if (numBytesToClient >= 0) {
         printf("Bytes written to client: %d\n", numBytesToClient);
     }
