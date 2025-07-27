@@ -1,5 +1,3 @@
-int i;
-
 struct Webfile {
     int len;
     char *content;
